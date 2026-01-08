@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Lab Óptico - Oficial GitHub</title>
+    <style>
+        body {
+            margin: 0; padding: 0; height: 100vh; display: flex;
+            font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden;
+            transition: background 1s ease; color: #000; 
+        }
+
+        /* Área Principal */
+        #main-area { 
+            flex: 1; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; text-align: center; 
+        }
+        #nome-rota { font-size: 8vw; font-weight: 900; text-transform: uppercase; line-height: 1; }
+        #relogio { font-size: 4vw; font-weight: 600; background: rgba(0,0,0,0.05); padding: 5px 30px; border-radius: 20px; border: 2px solid rgba(0,0,0,0.1); }
+
+        #container-countdown { margin-top: 20px; }
+        #timer-countdown {
+            font-size: 4.5vw; font-weight: 900; font-family: 'Courier New', monospace;
+            background: rgba(255,255,255,0.4); padding: 10px 30px; border-radius: 15px;
+            border: 4px solid #000; display: inline-block;
+        }
+
+        /* Sidebar (Direita) */
+        #sidebar { 
+            width: 32%; background: #ffffff; display: flex; 
+            flex-direction: column; padding: 25px; border-left: 8px solid #000; 
+            box-sizing: border-box;
+        }
+        
+        .sidebar-title { 
+            font-size: 1.8vw; font-weight: 900; border-bottom: 5px solid #000; 
+            margin-bottom: 20px; padding-bottom: 5px; text-align: center;
+        }
+
+        /* QUADRO DE AVISOS */
+        #quadro-avisos {
+            background: #ffeb3b;
+            border: 5px solid #000;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 5px 5px 0px #000;
+        }
+        #label-aviso { font-size: 1.3vw; font-weight: 900; text-transform: uppercase; color: #d32f2f; margin-bottom: 10px; }
+        #texto-aviso { 
+            font-size: 2vw; font-weight: 800; color: #000; 
+            word-wrap: break-word; line-height: 1.2;
+        }
+
+        /* Cards Extras */
+        .card-especial { background: #f0f0f0; margin-bottom: 15px; padding: 12px; border-radius: 8px; border-left: 15px solid #ccc; opacity: 0.2; }
+        .card-especial.ativo { opacity: 1; background: #fff; border: 3px solid #000; border-left: 15px solid #000; }
+        .card-especial h2 { margin: 0; font-size: 1.5vw; font-weight: 900; }
+        .card-especial p { margin: 2px 0 0 0; font-size: 1vw; font-weight: bold; }
+        #card-lima.ativo { border-left-color: #32CD32; }
+    </style>
+</head>
+<body>
+
+    <div id="main-area">
+        <div id="nome-rota">CARREGANDO...</div>
+        <div id="relogio">00:00:00</div>
+        
+        <div id="container-countdown">
+            <div style="font-size: 1.2vw; font-weight: bold;">TEMPO RESTANTE:</div>
+            <div id="timer-countdown">00:00:00</div>
+        </div>
+
+        <div style="margin-top:25px; border: 3px solid #000; padding: 15px; background: rgba(255,255,255,0.4); border-radius: 10px;">
+            <strong style="font-size: 1.1vw;">A SEGUIR:</strong><br>
+            <span id="nome-proxima" style="font-size:2.5vw; font-weight:900;">---</span>
+        </div>
+    </div>
+
+    <div id="sidebar">
+        <div class="sidebar-title">COMUNICADOS</div>
+        
+        <div id="quadro-avisos">
+            <div id="label-aviso">📢 ATENÇÃO:</div>
+            <div id="texto-aviso">Sincronizando avisos...</div>
+        </div>
+
+        <div class="sidebar-title" style="font-size: 1.3vw;">LOGÍSTICA EXTRA</div>
+        <div id="card-lima" class="card-especial"><h2>LIMA</h2><p>Correio (Seg, Qua, Qui, Sex)</p></div>
+        <div id="card-prata" class="card-especial"><h2>PRATA</h2><p>Logística Própria (Até 10:30)</p></div>
+        <div id="card-balcao" class="card-especial ativo"><h2>BALCÃO</h2><p>Retirada Local</p></div>
+    </div>
+
+    <script>
+        // SEU LINK CSV CONFIGURADO
+        const LINK_CSV_GOOGLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu_1GxAEt7dDwb6AuM-P8szawwCQUNYvXZaaCGeoJ4UD8y3-O-4ZvSBKYWnyj4nsnqzvCZfKs5EQRh/pub?output=csv"; 
+
+        const rotas = [
+            { nome: "CORAL / LILÁS", cor1: "#FF7F50", cor2: "#DCD0FF", inicio: "16:30:01", fim: "09:00:00" },
+            { nome: "AMARELO", cor1: "#FFD700", cor2: "#FFD700", inicio: "09:00:01", fim: "10:00:00" },
+            { nome: "BEGE / LILÁS", cor1: "#F5F5DC", cor2: "#DCD0FF", inicio: "10:00:01", fim: "14:00:00" },
+            { nome: "ROSA / AMARELO", cor1: "#FF69B4", cor2: "#FFD700", inicio: "14:00:01", fim: "16:30:00" }
+        ];
+
+        async function buscarAvisos() {
+            try {
+                // Fetch direto agora funciona via GitHub Pages
+                const response = await fetch(LINK_CSV_GOOGLE + "&t=" + Math.random());
+                const data = await response.text();
+                const rows = data.split('\n');
+                if (rows.length > 1) {
+                    // Pega o conteúdo da célula A2 (Index 1)
+                    // Se quiser usar a célula A1, mude para rows[0]
+                    let aviso = rows[1].replace(/^"(.*)"$/, '$1'); 
+                    document.getElementById('texto-aviso').innerText = aviso;
+                }
+            } catch (e) {
+                console.error("Falha ao carregar avisos.");
+            }
+        }
+
+        function atualizarPainel() {
+            const agora = new Date();
+            const h = agora.getHours(), m = agora.getMinutes(), s = agora.getSeconds();
+            document.getElementById('relogio').innerText = [h,m,s].map(u => String(u).padStart(2,'0')).join(':');
+
+            const totalSeg = (h * 3600) + (m * 60) + s;
+            let indexAtual = -1;
+
+            rotas.forEach((r, i) => {
+                const sIni = conv(r.inicio), sFim = conv(r.fim);
+                const ativo = (sIni > sFim) ? (totalSeg >= sIni || totalSeg <= sFim) : (totalSeg >= sIni && totalSeg <= sFim);
+                if (ativo) {
+                    indexAtual = i;
+                    document.body.style.background = (r.cor1 === r.cor2) ? r.cor1 : `linear-gradient(135deg, ${r.cor1} 50%, ${r.cor2} 50%)`;
+                    document.getElementById('nome-rota').innerText = r.nome;
+                    contagem(sFim);
+                }
+            });
+
+            if (indexAtual !== -1) {
+                document.getElementById('nome-proxima').innerText = rotas[(indexAtual + 1) % rotas.length].nome;
+            }
+
+            const dia = agora.getDay();
+            toggleCard('card-lima', [1,3,4,5].includes(dia) && totalSeg <= (9*3600));
+            toggleCard('card-prata', totalSeg <= (10.5*3600));
+        }
+
+        function conv(hms) { const p = hms.split(':').map(Number); return (p[0]*3600)+(p[1]*60)+(p[2]||0); }
+        
+        function contagem(sFim) {
+            const agora = new Date(); let alvo = new Date();
+            alvo.setHours(Math.floor(sFim/3600), Math.floor((sFim%3600)/60), sFim%60, 0);
+            if (alvo < agora) alvo.setDate(alvo.getDate()+1);
+            const diff = alvo - agora;
+            const dh = Math.floor(diff/3600000), dm = Math.floor((diff/60000)%60), ds = Math.floor((diff/1000)%60);
+            document.getElementById('timer-countdown').innerText = [dh,dm,ds].map(u => String(u).padStart(2,'0')).join(':');
+        }
+
+        function toggleCard(id, ativo) { document.getElementById(id).classList.toggle('ativo', ativo); }
+
+        setInterval(atualizarPainel, 1000);
+        setInterval(buscarAvisos, 20000); 
+        atualizarPainel();
+        buscarAvisos();
+    </script>
+</body>
+</html>
