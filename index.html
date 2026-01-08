@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Lab Óptico - Oficial GitHub</title>
+    <title>Painel Lab Óptico - Lista de Avisos</title>
     <style>
         body {
             margin: 0; padding: 0; height: 100vh; display: flex;
@@ -16,9 +16,9 @@
             justify-content: center; align-items: center; text-align: center; 
         }
         #nome-rota { font-size: 8vw; font-weight: 900; text-transform: uppercase; line-height: 1; }
-        #relogio { font-size: 4vw; font-weight: 600; background: rgba(0,0,0,0.05); padding: 5px 30px; border-radius: 20px; border: 2px solid rgba(0,0,0,0.1); }
+        #relogio { font-size: 3vw; font-weight: 600; background: rgba(0,0,0,0.05); padding: 5px 30px; border-radius: 20px; margin-bottom: 10px; }
 
-        #container-countdown { margin-top: 20px; }
+        #container-countdown { margin-top: 10px; }
         #timer-countdown {
             font-size: 4.5vw; font-weight: 900; font-family: 'Courier New', monospace;
             background: rgba(255,255,255,0.4); padding: 10px 30px; border-radius: 15px;
@@ -28,38 +28,58 @@
         /* Sidebar (Direita) */
         #sidebar { 
             width: 32%; background: #ffffff; display: flex; 
-            flex-direction: column; padding: 25px; border-left: 8px solid #000; 
+            flex-direction: column; padding: 20px; border-left: 8px solid #000; 
             box-sizing: border-box;
         }
         
         .sidebar-title { 
-            font-size: 1.8vw; font-weight: 900; border-bottom: 5px solid #000; 
-            margin-bottom: 20px; padding-bottom: 5px; text-align: center;
+            font-size: 1.5vw; font-weight: 900; border-bottom: 5px solid #000; 
+            margin-bottom: 15px; padding-bottom: 5px; text-align: center;
         }
 
-        /* QUADRO DE AVISOS */
+        /* QUADRO DE AVISOS EM LISTA */
         #quadro-avisos {
             background: #ffeb3b;
             border: 5px solid #000;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             flex-grow: 1;
             display: flex;
             flex-direction: column;
             box-shadow: 5px 5px 0px #000;
+            overflow-y: auto; /* Permite rolar se tiver muitos avisos */
         }
-        #label-aviso { font-size: 1.3vw; font-weight: 900; text-transform: uppercase; color: #d32f2f; margin-bottom: 10px; }
+        #label-aviso { font-size: 1.2vw; font-weight: 900; text-transform: uppercase; color: #d32f2f; margin-bottom: 10px; }
+        
         #texto-aviso { 
-            font-size: 2vw; font-weight: 800; color: #000; 
-            word-wrap: break-word; line-height: 1.2;
+            font-size: 1.6vw; font-weight: 800; color: #000; 
+            text-align: left; line-height: 1.3;
+        }
+
+        .aviso-item {
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        /* Estilo para avisos Urgentes */
+        .urgente {
+            color: #d32f2f;
+            animation: piscar 1s infinite;
+        }
+
+        @keyframes piscar {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
         }
 
         /* Cards Extras */
-        .card-especial { background: #f0f0f0; margin-bottom: 15px; padding: 12px; border-radius: 8px; border-left: 15px solid #ccc; opacity: 0.2; }
-        .card-especial.ativo { opacity: 1; background: #fff; border: 3px solid #000; border-left: 15px solid #000; }
-        .card-especial h2 { margin: 0; font-size: 1.5vw; font-weight: 900; }
-        .card-especial p { margin: 2px 0 0 0; font-size: 1vw; font-weight: bold; }
+        .card-especial { background: #f0f0f0; margin-bottom: 10px; padding: 10px; border-radius: 8px; border-left: 12px solid #ccc; opacity: 0.2; }
+        .card-especial.ativo { opacity: 1; background: #fff; border: 3px solid #000; border-left: 12px solid #000; }
+        .card-especial h2 { margin: 0; font-size: 1.3vw; font-weight: 900; }
+        .card-especial p { margin: 2px 0 0 0; font-size: 0.9vw; font-weight: bold; }
         #card-lima.ativo { border-left-color: #32CD32; }
     </style>
 </head>
@@ -70,32 +90,31 @@
         <div id="relogio">00:00:00</div>
         
         <div id="container-countdown">
-            <div style="font-size: 1.2vw; font-weight: bold;">TEMPO RESTANTE:</div>
+            <div style="font-size: 1.1vw; font-weight: bold;">TEMPO RESTANTE:</div>
             <div id="timer-countdown">00:00:00</div>
         </div>
 
-        <div style="margin-top:25px; border: 3px solid #000; padding: 15px; background: rgba(255,255,255,0.4); border-radius: 10px;">
-            <strong style="font-size: 1.1vw;">A SEGUIR:</strong><br>
-            <span id="nome-proxima" style="font-size:2.5vw; font-weight:900;">---</span>
+        <div style="margin-top:20px; border: 3px solid #000; padding: 10px; background: rgba(255,255,255,0.4); border-radius: 10px;">
+            <strong style="font-size: 1vw;">A SEGUIR:</strong><br>
+            <span id="nome-proxima" style="font-size:2.2vw; font-weight:900;">---</span>
         </div>
     </div>
 
     <div id="sidebar">
-        <div class="sidebar-title">COMUNICADOS</div>
+        <div class="sidebar-title">QUADRO DE AVISOS</div>
         
         <div id="quadro-avisos">
-            <div id="label-aviso">📢 ATENÇÃO:</div>
-            <div id="texto-aviso">Sincronizando avisos...</div>
+            <div id="label-aviso">📢 COMUNICADOS:</div>
+            <div id="texto-aviso">Sincronizando com a planilha...</div>
         </div>
 
-        <div class="sidebar-title" style="font-size: 1.3vw;">LOGÍSTICA EXTRA</div>
-        <div id="card-lima" class="card-especial"><h2>LIMA</h2><p>Correio (Seg, Qua, Qui, Sex)</p></div>
-        <div id="card-prata" class="card-especial"><h2>PRATA</h2><p>Logística Própria (Até 10:30)</p></div>
+        <div class="sidebar-title" style="font-size: 1.2vw;">SAÍDAS LOGÍSTICAS</div>
+        <div id="card-lima" class="card-especial"><h2>LIMA</h2><p>Correio até 09:00</p></div>
+        <div id="card-prata" class="card-especial"><h2>PRATA</h2><p>Própria até 10:30</p></div>
         <div id="card-balcao" class="card-especial ativo"><h2>BALCÃO</h2><p>Retirada Local</p></div>
     </div>
 
     <script>
-        // SEU LINK CSV CONFIGURADO
         const LINK_CSV_GOOGLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu_1GxAEt7dDwb6AuM-P8szawwCQUNYvXZaaCGeoJ4UD8y3-O-4ZvSBKYWnyj4nsnqzvCZfKs5EQRh/pub?output=csv"; 
 
         const rotas = [
@@ -107,18 +126,32 @@
 
         async function buscarAvisos() {
             try {
-                // Fetch direto agora funciona via GitHub Pages
                 const response = await fetch(LINK_CSV_GOOGLE + "&t=" + Math.random());
                 const data = await response.text();
                 const rows = data.split('\n');
-                if (rows.length > 1) {
-                    // Pega o conteúdo da célula A2 (Index 1)
-                    // Se quiser usar a célula A1, mude para rows[0]
-                    let aviso = rows[1].replace(/^"(.*)"$/, '$1'); 
-                    document.getElementById('texto-aviso').innerText = aviso;
+                
+                const containerAvisos = document.getElementById('texto-aviso');
+                containerAvisos.innerHTML = ""; // Limpa a lista atual
+
+                // Loop começando da linha 2 (índice 1) até o final da coluna A
+                for (let i = 1; i < rows.length; i++) {
+                    let textoLinha = rows[i].trim().replace(/^"(.*)"$/, '$1'); 
+                    
+                    if (textoLinha.length > 2) {
+                        const divItem = document.createElement('div');
+                        divItem.className = "aviso-item";
+                        
+                        // Verifica se a palavra URGENTE está no texto
+                        if (textoLinha.toUpperCase().includes("URGENTE")) {
+                            divItem.classList.add("urgente");
+                        }
+
+                        divItem.innerText = "• " + textoLinha;
+                        containerAvisos.appendChild(divItem);
+                    }
                 }
             } catch (e) {
-                console.error("Falha ao carregar avisos.");
+                console.error("Erro ao carregar avisos.");
             }
         }
 
