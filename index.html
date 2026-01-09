@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Lab Óptico - Lista de Avisos</title>
+    <title>Painel Lab Óptico - Master</title>
     <style>
         body {
             margin: 0; padding: 0; height: 100vh; display: flex;
@@ -48,7 +48,7 @@
             display: flex;
             flex-direction: column;
             box-shadow: 5px 5px 0px #000;
-            overflow-y: auto; /* Permite rolar se tiver muitos avisos */
+            overflow-y: auto;
         }
         #label-aviso { font-size: 1.2vw; font-weight: 900; text-transform: uppercase; color: #d32f2f; margin-bottom: 10px; }
         
@@ -63,7 +63,6 @@
             border-bottom: 2px solid rgba(0,0,0,0.1);
         }
 
-        /* Estilo para avisos Urgentes */
         .urgente {
             color: #d32f2f;
             animation: piscar 1s infinite;
@@ -81,6 +80,37 @@
         .card-especial h2 { margin: 0; font-size: 1.3vw; font-weight: 900; }
         .card-especial p { margin: 2px 0 0 0; font-size: 0.9vw; font-weight: bold; }
         #card-lima.ativo { border-left-color: #32CD32; }
+
+        /* BOTÃO DE EDIÇÃO FLUTUANTE */
+        #btn-editar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #000;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 12px;
+            opacity: 0; /* Invisível por padrão */
+            transition: opacity 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Mostra o botão quando passar o mouse no canto da tela */
+        body:hover #btn-editar {
+            opacity: 0.7;
+        }
+        #btn-editar:hover {
+            opacity: 1 !important;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -105,7 +135,7 @@
         
         <div id="quadro-avisos">
             <div id="label-aviso">📢 COMUNICADOS:</div>
-            <div id="texto-aviso">Sincronizando com a planilha...</div>
+            <div id="texto-aviso">Sincronizando...</div>
         </div>
 
         <div class="sidebar-title" style="font-size: 1.2vw;">SAÍDAS LOGÍSTICAS</div>
@@ -114,7 +144,12 @@
         <div id="card-balcao" class="card-especial ativo"><h2>BALCÃO</h2><p>Retirada Local</p></div>
     </div>
 
+    <a href="https://docs.google.com/spreadsheets/d/1fbPK5jXOKwSYHcK9cZLslBT9lRLsMUQ-fBMlAB6cnNg/edit?gid=0#gid=0" target="_blank" id="btn-editar">
+        ✏️ EDITAR COMUNICADOS
+    </a>
+
     <script>
+        // Use seu link de publicação CSV aqui
         const LINK_CSV_GOOGLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu_1GxAEt7dDwb6AuM-P8szawwCQUNYvXZaaCGeoJ4UD8y3-O-4ZvSBKYWnyj4nsnqzvCZfKs5EQRh/pub?output=csv"; 
 
         const rotas = [
@@ -129,37 +164,28 @@
                 const response = await fetch(LINK_CSV_GOOGLE + "&t=" + Math.random());
                 const data = await response.text();
                 const rows = data.split('\n');
-                
                 const containerAvisos = document.getElementById('texto-aviso');
-                containerAvisos.innerHTML = ""; // Limpa a lista atual
+                containerAvisos.innerHTML = ""; 
 
-                // Loop começando da linha 2 (índice 1) até o final da coluna A
                 for (let i = 1; i < rows.length; i++) {
                     let textoLinha = rows[i].trim().replace(/^"(.*)"$/, '$1'); 
-                    
                     if (textoLinha.length > 2) {
                         const divItem = document.createElement('div');
                         divItem.className = "aviso-item";
-                        
-                        // Verifica se a palavra URGENTE está no texto
                         if (textoLinha.toUpperCase().includes("URGENTE")) {
                             divItem.classList.add("urgente");
                         }
-
                         divItem.innerText = "• " + textoLinha;
                         containerAvisos.appendChild(divItem);
                     }
                 }
-            } catch (e) {
-                console.error("Erro ao carregar avisos.");
-            }
+            } catch (e) { console.error("Erro nos avisos"); }
         }
 
         function atualizarPainel() {
             const agora = new Date();
             const h = agora.getHours(), m = agora.getMinutes(), s = agora.getSeconds();
             document.getElementById('relogio').innerText = [h,m,s].map(u => String(u).padStart(2,'0')).join(':');
-
             const totalSeg = (h * 3600) + (m * 60) + s;
             let indexAtual = -1;
 
@@ -173,18 +199,15 @@
                     contagem(sFim);
                 }
             });
-
             if (indexAtual !== -1) {
                 document.getElementById('nome-proxima').innerText = rotas[(indexAtual + 1) % rotas.length].nome;
             }
-
             const dia = agora.getDay();
             toggleCard('card-lima', [1,3,4,5].includes(dia) && totalSeg <= (9*3600));
             toggleCard('card-prata', totalSeg <= (10.5*3600));
         }
 
         function conv(hms) { const p = hms.split(':').map(Number); return (p[0]*3600)+(p[1]*60)+(p[2]||0); }
-        
         function contagem(sFim) {
             const agora = new Date(); let alvo = new Date();
             alvo.setHours(Math.floor(sFim/3600), Math.floor((sFim%3600)/60), sFim%60, 0);
@@ -193,7 +216,6 @@
             const dh = Math.floor(diff/3600000), dm = Math.floor((diff/60000)%60), ds = Math.floor((diff/1000)%60);
             document.getElementById('timer-countdown').innerText = [dh,dm,ds].map(u => String(u).padStart(2,'0')).join(':');
         }
-
         function toggleCard(id, ativo) { document.getElementById(id).classList.toggle('ativo', ativo); }
 
         setInterval(atualizarPainel, 1000);
