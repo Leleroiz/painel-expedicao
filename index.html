@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Lab Óptico - Versão Final Corrigida</title>
+    <title>Painel Lab Óptico - Versão Final 100%</title>
     <style>
         body {
             margin: 0; padding: 0; height: 100vh; display: flex;
@@ -10,7 +10,7 @@
             background-color: #000;
         }
 
-        /* ÁREA DAS CORES (ESQUERDA) - CENTRALIZAÇÃO TOTAL */
+        /* ÁREA DAS CORES (ESQUERDA) */
         #main-area { 
             flex: 1; display: flex; flex-direction: column; 
             justify-content: center; align-items: center; text-align: center;
@@ -25,30 +25,27 @@
 
         #nome-rota { 
             font-size: 8vw; font-weight: 900; text-transform: uppercase; 
-            line-height: 0.9; margin-bottom: 20px;
-            color: #000; text-shadow: 0px 0px 20px rgba(255,255,255,0.3);
+            line-height: 0.9; margin-bottom: 20px; color: #000;
         }
 
-        /* CONTAINER DO TIMER */
+        /* TIMER PRINCIPAL */
         #container-countdown { 
             background: rgba(255,255,255,0.8); padding: 15px 40px; 
             border-radius: 30px; border: 6px solid #000;
         }
-
         #timer-countdown { 
-            font-size: 6vw; font-weight: 900; font-family: 'Courier New', monospace; 
-            color: #000; /* Cor padrão: PRETO */
+            font-size: 6vw; font-weight: 900; font-family: 'Courier New', monospace; color: #000;
         }
 
-        /* ESTILO PARA PISCAR EM VERMELHO (ÚLTIMOS 15 MINUTOS) */
-        .timer-alerta {
-            color: #ff0000 !important;
-            animation: piscar-vermelho 0.8s infinite;
-        }
+        /* PISCAR TIMER (15 MINUTOS FINAIS) */
+        .timer-alerta { color: #ff0000 !important; animation: piscar-anim 0.8s infinite; }
 
-        @keyframes piscar-vermelho {
+        /* PISCAR COMUNICADO URGENTE */
+        .item-urgente { color: #ff0000 !important; animation: piscar-anim 0.6s infinite; font-weight: 900; }
+
+        @keyframes piscar-anim {
             0% { opacity: 1; }
-            50% { opacity: 0.4; }
+            50% { opacity: 0.3; }
             100% { opacity: 1; }
         }
 
@@ -57,11 +54,11 @@
             background: #fff; border-radius: 15px; font-weight: 900;
         }
 
-        /* BARRA LATERAL (DIREITA) */
+        /* SIDEBAR */
         #sidebar { 
             width: 32%; background: #ffffff; display: flex; 
             flex-direction: column; padding: 20px; border-left: 12px solid #000; 
-            box-sizing: border-box; gap: 15px; z-index: 10;
+            box-sizing: border-box; gap: 15px;
         }
 
         .secao-titulo { 
@@ -78,20 +75,17 @@
             border-radius: 15px; flex-grow: 1; overflow-y: auto; box-shadow: 8px 8px 0px #000;
         }
         .comunicado-item { font-size: 1.5vw; font-weight: 800; margin-bottom: 10px; border-bottom: 2px solid rgba(0,0,0,0.1); }
-        .urgente { color: #d32f2f; animation: piscar 1s infinite; }
-        @keyframes piscar { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
         .card-log { background: #eee; padding: 10px; border: 3px solid #000; border-radius: 10px; opacity: 0.3; }
         .card-log.ativo { opacity: 1; background: #fff; }
 
-        /* BOTÃO EDITAR RESTAURADO E VISÍVEL */
+        /* BOTÃO EDITAR */
         #btn-editar { 
             position: fixed; bottom: 20px; right: 20px; 
             background: #000; color: #fff; padding: 12px 20px; 
             border-radius: 50px; text-decoration: none; 
             font-weight: bold; font-size: 14px; z-index: 1000;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
-            transition: 0.3s;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3); transition: 0.3s;
         }
         #btn-editar:hover { transform: scale(1.1); background: #333; }
     </style>
@@ -117,9 +111,9 @@
         <div class="secao-titulo">Grade de Horários</div>
         <table class="tabela-horarios">
             <tr><td><div class="cor-box" style="background:#FF7F50"></div>CORAL / LILÁS</td><td>16:15 - 09:00</td></tr>
-            <tr><td><div class="cor-box" style="background:#FFD700"></div>AMARELO</td><td>09:00 - 10:00</td></tr>
-            <tr><td><div class="cor-box" style="background:#F5F5DC"></div>BEGE / LILÁS</td><td>10:00 - 14:00</td></tr>
-            <tr><td><div class="cor-box" style="background:#FF69B4"></div>ROSA / AMARELO</td><td>14:00 - 16:15</td></tr>
+            <tr><td><div class="cor-box" style="background:#FFD700"></div>AMARELO</td><td>09:01 - 10:00</td></tr>
+            <tr><td><div class="cor-box" style="background:#F5F5DC"></div>BEGE / LILÁS</td><td>10:01 - 14:00</td></tr>
+            <tr><td><div class="cor-box" style="background:#FF69B4"></div>ROSA / AMARELO</td><td>14:01 - 16:15</td></tr>
         </table>
 
         <div class="secao-titulo">Comunicados</div>
@@ -157,11 +151,17 @@
                     if (txt.length > 2) {
                         const div = document.createElement('div');
                         div.className = "comunicado-item";
+                        
+                        // SE TIVER "URGENTE" NO TEXTO, ATIVA O PISCAR VERMELHO
+                        if (txt.toUpperCase().includes("URGENTE")) {
+                            div.classList.add("item-urgente");
+                        }
+                        
                         div.innerText = "• " + txt;
                         list.appendChild(div);
                     }
                 }
-            } catch (e) { console.log("Erro ao carregar"); }
+            } catch (e) { console.log("Erro ao carregar comunicados"); }
         }
 
         function atualizar() {
@@ -176,23 +176,17 @@
                 if (ativo) {
                     const areaPrincipal = document.getElementById('main-area');
                     areaPrincipal.style.background = `linear-gradient(to right, ${r.c1} 50%, ${r.c2} 50%)`;
-                    
                     document.getElementById('nome-rota').innerText = r.nome;
                     document.getElementById('nome-proxima').innerText = rotas[(i+1)%rotas.length].nome;
 
                     let alvo = new Date();
                     alvo.setHours(Math.floor(sFim/3600), Math.floor((sFim%3600)/60), sFim%60, 0);
                     if (alvo < agora) alvo.setDate(alvo.getDate() + 1);
-                    
                     const diff = alvo - agora;
                     const timerElement = document.getElementById('timer-countdown');
                     
-                    // LÓGICA: PRETO SEMPRE, VERMELHO PISCANDO SÓ NOS 15 MIN FINAIS
-                    if (diff > 0 && diff <= 900000) {
-                        timerElement.classList.add('timer-alerta');
-                    } else {
-                        timerElement.classList.remove('timer-alerta');
-                    }
+                    if (diff > 0 && diff <= 900000) { timerElement.classList.add('timer-alerta'); } 
+                    else { timerElement.classList.remove('timer-alerta'); }
 
                     const hR = Math.floor(diff/3600000), mR = Math.floor((diff%3600000)/60000), sR = Math.floor((diff%60000)/1000);
                     timerElement.innerText = `${String(hR).padStart(2,'0')}:${String(mR).padStart(2,'0')}:${String(sR).padStart(2,'0')}`;
@@ -211,5 +205,4 @@
         atualizar(); buscarComunicados();
     </script>
 </body>
-
 </html>
