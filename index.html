@@ -2,227 +2,211 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Lab Óptico - Master</title>
+    <title>Painel Lab Óptico - Versão Final Corrigida</title>
     <style>
         body {
             margin: 0; padding: 0; height: 100vh; display: flex;
             font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden;
-            transition: background 1s ease; color: #000; 
+            background-color: #000;
         }
 
-        /* Área Principal */
+        /* ÁREA DAS CORES (ESQUERDA) - CENTRALIZAÇÃO TOTAL */
         #main-area { 
             flex: 1; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; text-align: center; 
-        }
-        #nome-rota { font-size: 8vw; font-weight: 900; text-transform: uppercase; line-height: 1; }
-        #relogio { font-size: 3vw; font-weight: 600; background: rgba(0,0,0,0.05); padding: 5px 30px; border-radius: 20px; margin-bottom: 10px; }
-
-        #container-countdown { margin-top: 10px; }
-        #timer-countdown {
-            font-size: 4.5vw; font-weight: 900; font-family: 'Courier New', monospace;
-            background: rgba(255,255,255,0.4); padding: 10px 30px; border-radius: 15px;
-            border: 4px solid #000; display: inline-block;
+            justify-content: center; align-items: center; text-align: center;
+            transition: background 1s ease;
         }
 
-        /* Sidebar (Direita) */
-        #sidebar { 
-            width: 32%; background: #ffffff; display: flex; 
-            flex-direction: column; padding: 20px; border-left: 8px solid #000; 
-            box-sizing: border-box;
-        }
-        
-        .sidebar-title { 
-            font-size: 1.5vw; font-weight: 900; border-bottom: 5px solid #000; 
-            margin-bottom: 15px; padding-bottom: 5px; text-align: center;
+        #relogio { 
+            font-size: 3vw; font-weight: 800; 
+            background: rgba(255,255,255,0.9); padding: 5px 50px; 
+            border-radius: 50px; border: 5px solid #000; margin-bottom: 20px; 
         }
 
-        /* QUADRO DE AVISOS EM LISTA */
-        #quadro-avisos {
-            background: #ffeb3b;
-            border: 5px solid #000;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 5px 5px 0px #000;
-            overflow-y: auto;
-        }
-        #label-aviso { font-size: 1.2vw; font-weight: 900; text-transform: uppercase; color: #d32f2f; margin-bottom: 10px; }
-        
-        #texto-aviso { 
-            font-size: 1.6vw; font-weight: 800; color: #000; 
-            text-align: left; line-height: 1.3;
+        #nome-rota { 
+            font-size: 8vw; font-weight: 900; text-transform: uppercase; 
+            line-height: 0.9; margin-bottom: 20px;
+            color: #000; text-shadow: 0px 0px 20px rgba(255,255,255,0.3);
         }
 
-        .aviso-item {
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid rgba(0,0,0,0.1);
+        /* CONTAINER DO TIMER */
+        #container-countdown { 
+            background: rgba(255,255,255,0.8); padding: 15px 40px; 
+            border-radius: 30px; border: 6px solid #000;
         }
 
-        .urgente {
-            color: #d32f2f;
-            animation: piscar 1s infinite;
+        #timer-countdown { 
+            font-size: 6vw; font-weight: 900; font-family: 'Courier New', monospace; 
+            color: #000; /* Cor padrão: PRETO */
         }
 
-        @keyframes piscar {
+        /* ESTILO PARA PISCAR EM VERMELHO (ÚLTIMOS 15 MINUTOS) */
+        .timer-alerta {
+            color: #ff0000 !important;
+            animation: piscar-vermelho 0.8s infinite;
+        }
+
+        @keyframes piscar-vermelho {
             0% { opacity: 1; }
-            50% { opacity: 0.3; }
+            50% { opacity: 0.4; }
             100% { opacity: 1; }
         }
 
-        /* Cards Extras */
-        .card-especial { background: #f0f0f0; margin-bottom: 10px; padding: 10px; border-radius: 8px; border-left: 12px solid #ccc; opacity: 0.2; }
-        .card-especial.ativo { opacity: 1; background: #fff; border: 3px solid #000; border-left: 12px solid #000; }
-        .card-especial h2 { margin: 0; font-size: 1.3vw; font-weight: 900; }
-        .card-especial p { margin: 2px 0 0 0; font-size: 0.9vw; font-weight: bold; }
-        #card-lima.ativo { border-left-color: #32CD32; }
-
-        /* BOTÃO DE EDIÇÃO FLUTUANTE */
-        #btn-editar {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #000;
-            color: #fff;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: none;
-            font-size: 12px;
-            opacity: 0; /* Invisível por padrão */
-            transition: opacity 0.3s;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        #container-proxima {
+            margin-top: 30px; border: 4px solid #000; padding: 10px 40px; 
+            background: #fff; border-radius: 15px; font-weight: 900;
         }
 
-        /* Mostra o botão quando passar o mouse no canto da tela */
-        body:hover #btn-editar {
-            opacity: 0.7;
+        /* BARRA LATERAL (DIREITA) */
+        #sidebar { 
+            width: 32%; background: #ffffff; display: flex; 
+            flex-direction: column; padding: 20px; border-left: 12px solid #000; 
+            box-sizing: border-box; gap: 15px; z-index: 10;
         }
-        #btn-editar:hover {
-            opacity: 1 !important;
-            transform: scale(1.1);
+
+        .secao-titulo { 
+            font-size: 1.2vw; font-weight: 900; border-bottom: 5px solid #000; 
+            text-align: center; text-transform: uppercase; margin-bottom: 5px; background: #f0f0f0;
         }
+
+        .tabela-horarios { width: 100%; border-collapse: collapse; font-size: 0.95vw; }
+        .tabela-horarios td { padding: 8px; border-bottom: 1px solid #ddd; font-weight: bold; }
+        .cor-box { width: 20px; height: 20px; border: 2px solid #000; display: inline-block; vertical-align: middle; margin-right: 10px; border-radius: 4px; }
+
+        #quadro-comunicados {
+            background: #ffeb3b; border: 5px solid #000; padding: 15px;
+            border-radius: 15px; flex-grow: 1; overflow-y: auto; box-shadow: 8px 8px 0px #000;
+        }
+        .comunicado-item { font-size: 1.5vw; font-weight: 800; margin-bottom: 10px; border-bottom: 2px solid rgba(0,0,0,0.1); }
+
+        .card-log { background: #eee; padding: 10px; border: 3px solid #000; border-radius: 10px; opacity: 0.3; }
+        .card-log.ativo { opacity: 1; background: #fff; }
+
+        /* BOTÃO EDITAR RESTAURADO E VISÍVEL */
+        #btn-editar { 
+            position: fixed; bottom: 20px; right: 20px; 
+            background: #000; color: #fff; padding: 12px 20px; 
+            border-radius: 50px; text-decoration: none; 
+            font-weight: bold; font-size: 14px; z-index: 1000;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+        #btn-editar:hover { transform: scale(1.1); background: #333; }
     </style>
 </head>
 <body>
 
     <div id="main-area">
-        <div id="nome-rota">CARREGANDO...</div>
         <div id="relogio">00:00:00</div>
+        <div id="nome-rota">CARREGANDO...</div>
         
         <div id="container-countdown">
-            <div style="font-size: 1.1vw; font-weight: bold;">TEMPO RESTANTE:</div>
+            <div style="font-size: 1.2vw; font-weight: 900; margin-bottom: -5px;">FECHAMENTO EM:</div>
             <div id="timer-countdown">00:00:00</div>
         </div>
 
-        <div style="margin-top:20px; border: 3px solid #000; padding: 10px; background: rgba(255,255,255,0.4); border-radius: 10px;">
-            <strong style="font-size: 1vw;">A SEGUIR:</strong><br>
-            <span id="nome-proxima" style="font-size:2.2vw; font-weight:900;">---</span>
+        <div id="container-proxima">
+            <div style="font-size: 1vw;">PRÓXIMA SAÍDA:</div>
+            <div id="nome-proxima" style="font-size: 2.2vw; text-transform: uppercase;">---</div>
         </div>
     </div>
 
     <div id="sidebar">
-        <div class="sidebar-title">QUADRO DE AVISOS</div>
-        
-        <div id="quadro-avisos">
-            <div id="label-aviso">📢 COMUNICADOS:</div>
-            <div id="texto-aviso">Sincronizando...</div>
+        <div class="secao-titulo">Grade de Horários</div>
+        <table class="tabela-horarios">
+            <tr><td><div class="cor-box" style="background:#FF7F50"></div>CORAL / LILÁS</td><td>16:15 - 09:00</td></tr>
+            <tr><td><div class="cor-box" style="background:#FFD700"></div>AMARELO</td><td>09:00 - 10:00</td></tr>
+            <tr><td><div class="cor-box" style="background:#F5F5DC"></div>BEGE / LILÁS</td><td>10:00 - 14:00</td></tr>
+            <tr><td><div class="cor-box" style="background:#FF69B4"></div>ROSA / AMARELO</td><td>14:00 - 16:15</td></tr>
+        </table>
+
+        <div class="secao-titulo">Comunicados</div>
+        <div id="quadro-comunicados">
+            <div id="lista-comunicados">Sincronizando...</div>
         </div>
 
-        <div class="sidebar-title" style="font-size: 1.2vw;">SAÍDAS LOGÍSTICAS</div>
-        <div id="card-lima" class="card-especial"><h2>LIMA</h2><p>Correio até 09:00</p></div>
-        <div id="card-prata" class="card-especial"><h2>PRATA</h2><p>Própria até 10:30</p></div>
-        <div id="card-balcao" class="card-especial ativo"><h2>BALCÃO</h2><p>Retirada Local</p></div>
+        <div class="secao-titulo">Saídas Logísticas</div>
+        <div id="log-lima" class="card-log"><strong>LIMA</strong> - Correio até 09:00</div>
+        <div id="log-prata" class="card-log"><strong>PRATA</strong> - Própria até 10:30</div>
+        <div class="card-log ativo" style="border-left: 10px solid #000;"><strong>BALCÃO</strong> - Retirada Local</div>
     </div>
 
-    <a href="https://docs.google.com/spreadsheets/d/1fbPK5jXOKwSYHcK9cZLslBT9lRLsMUQ-fBMlAB6cnNg/edit?gid=0#gid=0" target="_blank" id="btn-editar">
-        ✏️ EDITAR COMUNICADOS
-    </a>
+    <a href="https://docs.google.com/spreadsheets/d/1fbPK5jXOKwSYHcK9cZLslBT9lRLsMUQ-fBMlAB6cnNg/edit?gid=0#gid=0" target="_blank" id="btn-editar">✏️ EDITAR COMUNICADOS</a>
 
     <script>
-        // Use seu link de publicação CSV aqui
-        const LINK_CSV_GOOGLE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu_1GxAEt7dDwb6AuM-P8szawwCQUNYvXZaaCGeoJ4UD8y3-O-4ZvSBKYWnyj4nsnqzvCZfKs5EQRh/pub?output=csv"; 
+        const LINK_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu_1GxAEt7dDwb6AuM-P8szawwCQUNYvXZaaCGeoJ4UD8y3-O-4ZvSBKYWnyj4nsnqzvCZfKs5EQRh/pub?output=csv";
 
         const rotas = [
-            { nome: "CORAL / LILÁS", cor1: "#FF7F50", cor2: "#DCD0FF", inicio: "16:15:01", fim: "09:00:00" },
-            { nome: "AMARELO", cor1: "#FFD700", cor2: "#FFD700", inicio: "09:00:01", fim: "10:00:00" },
-            { nome: "BEGE / LILÁS", cor1: "#F5F5DC", cor2: "#DCD0FF", inicio: "10:00:01", fim: "14:00:00" },
-            { nome: "ROSA / AMARELO", cor1: "#FF69B4", cor2: "#FFD700", inicio: "14:00:01", fim: "16:15:00" }
+            { nome: "CORAL / LILÁS", c1: "#FF7F50", c2: "#DCD0FF", inicio: "16:15:01", fim: "09:00:00" },
+            { nome: "AMARELO", c1: "#FFD700", c2: "#FFD700", inicio: "09:00:01", fim: "10:00:00" },
+            { nome: "BEGE / LILÁS", c1: "#F5F5DC", c2: "#DCD0FF", inicio: "10:00:01", fim: "14:00:00" },
+            { nome: "ROSA / AMARELO", c1: "#FF69B4", c2: "#FFD700", inicio: "14:00:01", fim: "16:15:00" }
         ];
 
-        async function buscarAvisos() {
+        async function buscarComunicados() {
             try {
-                const response = await fetch(LINK_CSV_GOOGLE + "&t=" + Math.random());
-                const data = await response.text();
+                const res = await fetch(LINK_CSV + "&t=" + Math.random());
+                const data = await res.text();
                 const rows = data.split('\n');
-                const containerAvisos = document.getElementById('texto-aviso');
-                containerAvisos.innerHTML = ""; 
-
+                const list = document.getElementById('lista-comunicados');
+                list.innerHTML = "";
                 for (let i = 1; i < rows.length; i++) {
-                    let textoLinha = rows[i].trim().replace(/^"(.*)"$/, '$1'); 
-                    if (textoLinha.length > 2) {
-                        const divItem = document.createElement('div');
-                        divItem.className = "aviso-item";
-                        if (textoLinha.toUpperCase().includes("URGENTE")) {
-                            divItem.classList.add("urgente");
-                        }
-                        divItem.innerText = "• " + textoLinha;
-                        containerAvisos.appendChild(divItem);
+                    let txt = rows[i].trim().replace(/^"(.*)"$/, '$1');
+                    if (txt.length > 2) {
+                        const div = document.createElement('div');
+                        div.className = "comunicado-item";
+                        div.innerText = "• " + txt;
+                        list.appendChild(div);
                     }
                 }
-            } catch (e) { console.error("Erro nos avisos"); }
+            } catch (e) { console.log("Erro ao carregar"); }
         }
 
-        function atualizarPainel() {
+        function atualizar() {
             const agora = new Date();
-            const h = agora.getHours(), m = agora.getMinutes(), s = agora.getSeconds();
-            document.getElementById('relogio').innerText = [h,m,s].map(u => String(u).padStart(2,'0')).join(':');
-            const totalSeg = (h * 3600) + (m * 60) + s;
-            let indexAtual = -1;
+            const segAtual = (agora.getHours()*3600) + (agora.getMinutes()*60) + agora.getSeconds();
+            document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
 
             rotas.forEach((r, i) => {
                 const sIni = conv(r.inicio), sFim = conv(r.fim);
-                const ativo = (sIni > sFim) ? (totalSeg >= sIni || totalSeg <= sFim) : (totalSeg >= sIni && totalSeg <= sFim);
+                const ativo = (sIni > sFim) ? (segAtual >= sIni || segAtual <= sFim) : (segAtual >= sIni && segAtual <= sFim);
+
                 if (ativo) {
-                    indexAtual = i;
-                    document.body.style.background = (r.cor1 === r.cor2) ? r.cor1 : `linear-gradient(135deg, ${r.cor1} 50%, ${r.cor2} 50%)`;
+                    const areaPrincipal = document.getElementById('main-area');
+                    areaPrincipal.style.background = `linear-gradient(to right, ${r.c1} 50%, ${r.c2} 50%)`;
+                    
                     document.getElementById('nome-rota').innerText = r.nome;
-                    contagem(sFim);
+                    document.getElementById('nome-proxima').innerText = rotas[(i+1)%rotas.length].nome;
+
+                    let alvo = new Date();
+                    alvo.setHours(Math.floor(sFim/3600), Math.floor((sFim%3600)/60), sFim%60, 0);
+                    if (alvo < agora) alvo.setDate(alvo.getDate() + 1);
+                    
+                    const diff = alvo - agora;
+                    const timerElement = document.getElementById('timer-countdown');
+                    
+                    // LÓGICA: PRETO SEMPRE, VERMELHO PISCANDO SÓ NOS 15 MIN FINAIS
+                    if (diff > 0 && diff <= 900000) {
+                        timerElement.classList.add('timer-alerta');
+                    } else {
+                        timerElement.classList.remove('timer-alerta');
+                    }
+
+                    const hR = Math.floor(diff/3600000), mR = Math.floor((diff%3600000)/60000), sR = Math.floor((diff%60000)/1000);
+                    timerElement.innerText = `${String(hR).padStart(2,'0')}:${String(mR).padStart(2,'0')}:${String(sR).padStart(2,'0')}`;
                 }
             });
-            if (indexAtual !== -1) {
-                document.getElementById('nome-proxima').innerText = rotas[(indexAtual + 1) % rotas.length].nome;
-            }
+
             const dia = agora.getDay();
-            toggleCard('card-lima', [1,3,4,5].includes(dia) && totalSeg <= (9*3600));
-            toggleCard('card-prata', totalSeg <= (10.5*3600));
+            document.getElementById('log-lima').classList.toggle('ativo', [1,3,4,5].includes(dia) && segAtual <= 9*3600);
+            document.getElementById('log-prata').classList.toggle('ativo', segAtual <= 10.5*3600);
         }
 
         function conv(hms) { const p = hms.split(':').map(Number); return (p[0]*3600)+(p[1]*60)+(p[2]||0); }
-        function contagem(sFim) {
-            const agora = new Date(); let alvo = new Date();
-            alvo.setHours(Math.floor(sFim/3600), Math.floor((sFim%3600)/60), sFim%60, 0);
-            if (alvo < agora) alvo.setDate(alvo.getDate()+1);
-            const diff = alvo - agora;
-            const dh = Math.floor(diff/3600000), dm = Math.floor((diff/60000)%60), ds = Math.floor((diff/1000)%60);
-            document.getElementById('timer-countdown').innerText = [dh,dm,ds].map(u => String(u).padStart(2,'0')).join(':');
-        }
-        function toggleCard(id, ativo) { document.getElementById(id).classList.toggle('ativo', ativo); }
 
-        setInterval(atualizarPainel, 1000);
-        setInterval(buscarAvisos, 20000); 
-        atualizarPainel();
-        buscarAvisos();
+        setInterval(atualizar, 1000);
+        setInterval(buscarComunicados, 30000);
+        atualizar(); buscarComunicados();
     </script>
 </body>
-
 </html>
