@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Painel Lab Óptico - Performance e Feedback</title>
+    <title>Painel Lab</title>
     <style>
         body {
             margin: 0; padding: 0; height: 100vh; display: flex;
@@ -18,19 +18,6 @@
             justify-content: flex-start; align-items: center; text-align: center;
             transition: background 1s ease; padding-top: 20px;
         }
-
-        /* NOVA CAIXA DE ELOGIOS (TOPO) */
-        #caixa-elogios {
-            width: 90%; background: rgba(255, 255, 255, 0.9);
-            border: 5px solid #000; border-radius: 15px;
-            padding: 15px; margin-bottom: 20px; min-height: 80px;
-            display: flex; flex-direction: column; justify-content: center;
-            box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        /* USO DO CLAMP: Protege a fonte de ficar muito pequena em janelas */
-        #titulo-elogio { font-size: clamp(12px, 1vw, 24px); font-weight: 900; color: #d32f2f; text-transform: uppercase; margin-bottom: 5px; }
-        #texto-elogio { font-size: clamp(16px, 1.8vw, 36px); font-weight: 800; color: #000; font-style: italic; transition: opacity 0.5s; }
 
         #relogio { 
             font-size: clamp(24px, 2.5vw, 60px); font-weight: 800; 
@@ -120,11 +107,6 @@
 <body>
 
     <div id="main-area">
-        <div id="caixa-elogios">
-            <div id="titulo-elogio">🌟 FEEDBACK DA SEMANA:</div>
-            <div id="texto-elogio">Carregando elogios dos nossos clientes...</div>
-        </div>
-
         <div id="relogio">00:00:00</div>
         <div id="nome-rota">CARREGANDO...</div>
         
@@ -188,8 +170,8 @@
         <div id="quadro-comunicados"><div id="lista-comunicados">Carregando...</div></div>
 
         <div class="secao-titulo" id="titulo-logistica">Saídas Logísticas</div>
-        <div id="log-lima" class="card-log" style="border-left: 8px solid #35fc03;"><strong>LIMA</strong> - Correio até 09:00</div>
-        <div id="log-prata" class="card-log" style="border-left: 8px solid #d1d1d1;"><strong>PRATA</strong> - Própria até 10:30</div>
+        <div id="log-lima" class="card-log" style="border-left: 8px solid #000;"><strong>LIMA</strong> - Correio até 09:00</div>
+        <div id="log-prata" class="card-log" style="border-left: 8px solid #000;"><strong>PRATA</strong> - Própria até 10:30</div>
         <div id="log-balcao" class="card-log ativo" style="border-left: 8px solid #000;"><strong>BALCÃO</strong> - Retirada Local</div>
     </div>
 
@@ -197,7 +179,6 @@
 
     <script>
         const LINK_CSV_COMUNICADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu_1GxAEt7dDwb6AuM-P8szawwCQUNYvXZaaCGeoJ4UD8y3-O-4ZvSBKYWnyj4nsnqzvCZfKs5EQRh/pub?gid=0&single=true&output=csv";
-        const LINK_CSV_ELOGIOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQu_1GxAEt7dDwb6AuM-P8szawwCQUNYvXZaaCGeoJ4UD8y3-O-4ZvSBKYWnyj4nsnqzvCZfKs5EQRh/pub?gid=1234763483&single=true&output=csv";
 
         const rotas = [
             { nome: "CORAL / LILÁS", c1: "#FF7F50", c2: "#DCD0FF", inicio: "16:15:01", fim: "09:00:00" },
@@ -206,14 +187,19 @@
             { nome: "ROSA / AMARELO", c1: "#FF69B4", c2: "#FFD700", inicio: "14:00:01", fim: "16:15:00" }
         ];
 
-        let listaElogios = ["Aguardando feedbacks..."];
-        let indiceElogio = 0;
-
         async function buscarDados() {
             // BUSCAR COMUNICADOS
             try {
                 const resC = await fetch(LINK_CSV_COMUNICADOS + "&t=" + Math.random());
+                if (!resC.ok) throw new Error("Falha na requisição dos comunicados");
+                
                 const dataC = await resC.text();
+                
+                // Trava de segurança: Se for HTML (página de erro do Google), aborta
+                if (dataC.trim().toLowerCase().startsWith("<!doctype") || dataC.trim().toLowerCase().startsWith("<html")) {
+                    throw new Error("Google retornou HTML em vez de CSV nos comunicados");
+                }
+
                 const rowsC = dataC.split('\n');
                 const listC = document.getElementById('lista-comunicados');
                 listC.innerHTML = "";
@@ -227,32 +213,9 @@
                     }
                 }
             } catch (e) {
-                console.log("Erro ao carregar comunicados");
+                console.warn("Aviso Comunicados:", e.message);
             }
-
-            // BUSCAR ELOGIOS
-            try {
-                const resE = await fetch(LINK_CSV_ELOGIOS + "&t=" + Math.random());
-                const dataE = await resE.text();
-                const rowsE = dataE.split('\n');
-                let temporario = [];
-                for (let i = 1; i < rowsE.length; i++) {
-                    let txt = rowsE[i].trim().replace(/^"(.*)"$/, '$1');
-                    if (txt.length > 5) temporario.push(txt);
-                }
-                if(temporario.length > 0) listaElogios = temporario;
-            } catch (e) {}
-        }
-
-        function rodarSlidesElogios() {
-            const txtElem = document.getElementById('texto-elogio');
-            txtElem.style.opacity = 0;
-            setTimeout(() => {
-                txtElem.innerText = `"${listaElogios[indiceElogio]}"`;
-                txtElem.style.opacity = 1;
-                indiceElogio = (indiceElogio + 1) % listaElogios.length;
-            }, 500);
-        }
+        } // <--- Essa era a chave que estava faltando!
 
         function atualizar() {
             const agora = new Date();
@@ -297,8 +260,8 @@
 
         setInterval(atualizar, 1000);
         setInterval(buscarDados, 60000); // Atualiza dados da planilha a cada 1 min
-        setInterval(rodarSlidesElogios, 12000); // Muda o elogio a cada 12 segundos
-        atualizar(); buscarDados(); rodarSlidesElogios();
+        atualizar(); 
+        buscarDados(); 
     </script>
 </body>
 </html>
