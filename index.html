@@ -53,15 +53,30 @@
             box-sizing: border-box; gap: 6px;
         }
         .secao-titulo { font-size: clamp(12px, 1vw, 24px); font-weight: 900; border-bottom: 3px solid #000; text-align: center; text-transform: uppercase; background: #f0f0f0; padding: 2px 0; }
-        
+         
         .tabela-horarios { width: 100%; border-collapse: collapse; font-size: clamp(11px, 0.8vw, 20px); }
         .tabela-horarios td { padding: 3px; border-bottom: 1px solid #ddd; font-weight: bold; }
-        
+         
         .tabela-prazos { width: 100%; border-collapse: collapse; font-size: clamp(10px, 0.75vw, 18px); }
         .tabela-prazos td { padding: 2px 4px; border-bottom: 1px solid #ddd; font-weight: bold; line-height: 1.1; }
         .tabela-prazos td:first-child { width: 40%; } 
-        
+         
         .cor-box { width: 14px; height: 14px; border: 2px solid #000; display: inline-block; vertical-align: middle; margin-right: 6px; border-radius: 3px; }
+
+        /* ESTILO DO EASTER EGG */
+        .easter-egg-beto {
+            background-image: url('beto.png');
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        /* Efeito divertido: ele aumenta um pouquinho se alguém passar o mouse em cima */
+        .easter-egg-beto:hover {
+            transform: scale(2.5);
+            z-index: 10;
+            position: relative;
+        }
 
         #quadro-comunicados { background: #ffeb3b; border: 4px solid #000; padding: 8px; border-radius: 10px; flex-grow: 1; overflow-y: auto; min-height: 80px; }
         .comunicado-item { font-size: clamp(12px, 1.1vw, 26px); font-weight: 800; margin-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,0.1); }
@@ -91,12 +106,12 @@
                 border-top: 12px solid #000; /* Põe a borda no topo para separar as metades */
                 min-height: 50vh; /* Garante que os comunicados respirem */
             }
-            
+             
             /* Reajuste das fontes para Telas Verticais */
             #nome-rota { font-size: clamp(50px, 15vw, 150px); }
             #relogio { font-size: clamp(30px, 8vw, 60px); }
             #timer-countdown { font-size: clamp(40px, 10vw, 120px); }
-            
+             
             .secao-titulo { font-size: clamp(16px, 4vw, 30px); }
             .tabela-horarios, .tabela-prazos { font-size: clamp(14px, 3vw, 25px); }
             .comunicado-item { font-size: clamp(14px, 3.5vw, 26px); }
@@ -109,7 +124,7 @@
     <div id="main-area">
         <div id="relogio">00:00:00</div>
         <div id="nome-rota">CARREGANDO...</div>
-        
+         
         <div id="container-countdown">
             <div style="font-size: 1vw; font-weight: 900;">FECHAMENTO EM:</div>
             <div id="timer-countdown">00:00:00</div>
@@ -161,7 +176,7 @@
                 <td>1 a 2 dias úteis</td>
             </tr>
             <tr>
-                <td><div class="cor-box" style="background:#FFFFFF"></div>BALCÃO</td>
+                <td><div class="cor-box easter-egg-beto"></div>BALCÃO</td>
                 <td>Cliente vem buscar</td>
             </tr>
         </table>
@@ -188,14 +203,12 @@
         ];
 
         async function buscarDados() {
-            // BUSCAR COMUNICADOS
             try {
                 const resC = await fetch(LINK_CSV_COMUNICADOS + "&t=" + Math.random());
                 if (!resC.ok) throw new Error("Falha na requisição dos comunicados");
-                
+                 
                 const dataC = await resC.text();
-                
-                // Trava de segurança: Se for HTML (página de erro do Google), aborta
+                 
                 if (dataC.trim().toLowerCase().startsWith("<!doctype") || dataC.trim().toLowerCase().startsWith("<html")) {
                     throw new Error("Google retornou HTML em vez de CSV nos comunicados");
                 }
@@ -215,17 +228,16 @@
             } catch (e) {
                 console.warn("Aviso Comunicados:", e.message);
             }
-        } // <--- Essa era a chave que estava faltando!
+        }
 
         function atualizar() {
             const agora = new Date();
             const horas = agora.getHours();
             const minutos = agora.getMinutes();
             const segAtual = (horas * 3600) + (minutos * 60) + agora.getSeconds();
-            
+             
             document.getElementById('relogio').innerText = agora.toLocaleTimeString('pt-BR');
 
-            // CONTROLE DAS ROTAS PRINCIPAIS
             rotas.forEach((r, i) => {
                 const sIni = conv(r.inicio), sFim = conv(r.fim);
                 const ativo = (sIni > sFim) ? (segAtual >= sIni || segAtual <= sFim) : (segAtual >= sIni && segAtual <= sFim);
@@ -244,14 +256,11 @@
                 }
             });
 
-            // NOVO: CONTROLE DE SAÍDAS LOGÍSTICAS (Ocultar pelo horário)
             const minutosDoDia = (horas * 60) + minutos;
-            
-            // LIMA some a partir das 09:00 (9 * 60 = 540)
+             
             const logLima = document.getElementById('log-lima');
             if (logLima) logLima.style.display = (minutosDoDia >= 540) ? 'none' : 'block';
 
-            // PRATA some a partir das 10:30 (10 * 60 + 30 = 630)
             const logPrata = document.getElementById('log-prata');
             if (logPrata) logPrata.style.display = (minutosDoDia >= 630) ? 'none' : 'block';
         }
@@ -259,7 +268,7 @@
         function conv(hms) { const p = hms.split(':').map(Number); return (p[0]*3600)+(p[1]*60)+(p[2]||0); }
 
         setInterval(atualizar, 1000);
-        setInterval(buscarDados, 60000); // Atualiza dados da planilha a cada 1 min
+        setInterval(buscarDados, 60000);
         atualizar(); 
         buscarDados(); 
     </script>
